@@ -11,7 +11,7 @@
  * @copyright Johannes Terhürne 2014 
  */
 
-$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{aggregator_legend:hide},aggregator_blacklist,aggregator_facebook_app_id,aggregator_faceboook_app_secret,aggregator_twitter_api_key,aggregator_twitter_api_secret,aggregator_twitter_access_token,aggregator_twitter_access_token_secret,aggregator_instagram_client_id,aggregator_instagram_client_secret,aggregator_facebook_cache,aggregator_twitter_cache,aggregator_instagram_cache';
+$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{aggregator_legend:hide},aggregator_blacklist,aggregator_facebook_app_id,aggregator_faceboook_app_secret,aggregator_twitter_api_key,aggregator_twitter_api_secret,aggregator_twitter_access_token,aggregator_twitter_access_token_secret,aggregator_instagram_client_id,aggregator_instagram_client_secret,aggregator_instagram_access_token,aggregator_facebook_cache,aggregator_twitter_cache,aggregator_instagram_cache';
 
 $GLOBALS['TL_DCA']['tl_settings']['fields']['aggregator_blacklist'] = array(
 	'label'		=> &$GLOBALS['TL_LANG']['tl_settings']['aggregator_blacklist'],
@@ -65,6 +65,13 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['aggregator_instagram_client_secret'
 	'label'		=> &$GLOBALS['TL_LANG']['tl_settings']['aggregator_instagram_client_secret'],
 	'inputType'	=> 'text',
 	'eval'		=> array('nospace'=>true, 'tl_class'=>'w50 m12')
+);
+
+
+$GLOBALS['TL_DCA']['tl_settings']['fields']['aggregator_instagram_access_token'] = array(
+	'label'		=> &$GLOBALS['TL_LANG']['tl_settings']['aggregator_instagram_access_token'],
+	'inputType'	=> 'text',
+	'eval'		=> array('nospace'=>true, 'tl_class'=>'w50')
 );
 
 $GLOBALS['TL_DCA']['tl_settings']['fields']['aggregator_facebook_cache'] = array(

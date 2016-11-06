@@ -19,7 +19,15 @@ class AggregatorEngine extends \Backend{
 	{
 		global $GLOBALS;
 		$str = ltrim($str, '@');
-		if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
+		if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'] != '') {
+		    $data = $this->fetchUrl('https://api.instagram.com/v1/users/self/?access_token='.$GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']);
+		    if ($data['data']['id'])
+		    {
+			    return $data['data']['id'];
+		    } else {
+			    throw new \Exception($GLOBALS['TL_LANG']['ERR']['profileDoesNotExist']);
+		    }
+	    } elseif (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
 		{
 			$data = $this->fetchUrl('https://api.instagram.com/v1/users/search?q='.$str.'&count=1&client_id='.$GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']);
 			if (count($data['data']) == 1)
@@ -37,7 +45,10 @@ class AggregatorEngine extends \Backend{
 	public function getInstagramName($str, $obj)
 	{
 		global $GLOBALS;
-		if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
+		if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'] != '') {
+		    $data = $this->fetchUrl('https://api.instagram.com/v1/users/self/?access_token='.$GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']);
+		    return $data['data']['username'];
+	    } elseif (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
 		{
 			$data = $this->fetchUrl('https://api.instagram.com/v1/users/'.trim($str).'?client_id='.$GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']);
 			return $data['data']['username'];
@@ -381,7 +392,10 @@ class AggregatorEngine extends \Backend{
 						break;
 						
 					case 'instagramUser':
-						if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
+					    if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'] != '') {
+					        $data = $this->fetchUrl('https://api.instagram.com/v1/users/self/media/recent?access_token='.$GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'].'&count=50');
+							$this->parseDataToCache($data['data'], $allActiveJobs->id, $currentBadwordList, 'instagram');
+					    } elseif (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
 						{
 							$data = $this->fetchUrl('https://api.instagram.com/v1/users/'.urlencode($allActiveJobs->instagramUser).'/media/recent?client_id='.$GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'].'&count=50');
 							$this->parseDataToCache($data['data'], $allActiveJobs->id, $currentBadwordList, 'instagram');
