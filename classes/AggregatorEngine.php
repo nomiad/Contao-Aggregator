@@ -2,19 +2,19 @@
 
 /**
  * Contao Open Source CMS
- * 
+ *
  * Copyright (C) 2005-2014 Leo Feyer
- * 
- * @package   aggregator 
+ *
+ * @package   aggregator
  * @author    Johannes Terhürne
  * @license   MIT License
- * @copyright Johannes Terhürne 2014 
+ * @copyright Johannes Terhürne 2014
  */
 
 namespace Aggregator;
 
 class AggregatorEngine extends \Backend{
-		
+
 	public function getInstagramId($str, $obj)
 	{
 		global $GLOBALS;
@@ -41,7 +41,7 @@ class AggregatorEngine extends \Backend{
 			throw new \Exception($GLOBALS['TL_LANG']['ERR']['noInstagramCredentials']);
 		}
 	}
-	
+
 	public function getInstagramName($str, $obj)
 	{
 		global $GLOBALS;
@@ -56,7 +56,7 @@ class AggregatorEngine extends \Backend{
 			$this->log($GLOBALS['TL_LANG']['ERR']['noInstagramCredentials'], 'AggregatorEngine getInstagramName()',TL_ERROR);
 		}
 	}
-	
+
 	public function validateHashtag($str, $obj)
 	{
 		$str = ltrim($str, '@');
@@ -67,12 +67,12 @@ class AggregatorEngine extends \Backend{
 			throw new \Exception($GLOBALS['TL_LANG']['ERR']['wrongHashtag']);
 		}
 	}
-	
+
 	public function getFacebookAlias($str, $obj)
 	{
 		global $GLOBALS;
 		if (isset($GLOBALS['TL_CONFIG']['aggregator_facebook_app_id']) && $GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']) && $GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret'] != '')
-		{	
+		{
 			$data = $this->fetchUrl('https://graph.facebook.com/v2.5/'.$str.'?fields=username&access_token='.$GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'].'|'.$GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']);
 			if ($data['error']['code'] == 803)
 			{
@@ -87,13 +87,13 @@ class AggregatorEngine extends \Backend{
 			$this->log($GLOBALS['TL_LANG']['ERR']['noFacebookCredentials'], 'AggregatorEngine getFacebookAlias()',TL_ERROR);
 		}
 	}
-	
+
 	public function getFacebookId($str, $obj)
 	{
 		global $GLOBALS;
 		$str = ltrim($str, '@');
 		if (isset($GLOBALS['TL_CONFIG']['aggregator_facebook_app_id']) && $GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']) && $GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret'] != '')
-		{	
+		{
 			$data = $this->fetchUrl('https://graph.facebook.com/v2.5/'.$str.'?access_token='.$GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'].'|'.$GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']);
 			if ($data['error']['code'] == 803)
 			{
@@ -109,7 +109,7 @@ class AggregatorEngine extends \Backend{
 			throw new \Exception($GLOBALS['TL_LANG']['ERR']['noFacebookCredentials']);
 		}
 	}
-	
+
 	public function checkTwitterAlias($str, $obj)
 	{
 		global $GLOBALS;
@@ -138,18 +138,18 @@ class AggregatorEngine extends \Backend{
 			throw new \Exception($GLOBALS['TL_LANG']['ERR']['noTwitterCredentials']);
 		}
 	}
-	
+
 	public function convertToSeconds($str, $obj)
 	{
-		
+
 		return $str*60;
 	}
-	
+
 	public function convertToMinutes($str, $obj)
 	{
 		return $str/60;
 	}
-	
+
 	private function fetchUrl($url, $header=false)
 	{
 		$ch = curl_init();
@@ -163,14 +163,14 @@ class AggregatorEngine extends \Backend{
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		return json_decode(curl_exec($ch), true);
 	}
-	
+
 	public function getAllChannels()
 	{
 		$arrForms = array();
 		$objForms = $this->Database->execute("SELECT * FROM tl_aggregator ORDER BY title");
 
 		while ($objForms->next())
-		{   
+		{
 			if ($objForms->type == 'facebookUser' || $objForms->type == 'facebookHashtag')
 			{
 				if ($objForms->type == 'facebookUser')
@@ -193,13 +193,17 @@ class AggregatorEngine extends \Backend{
 					$arrForms[$objForms->id] = '[Twitter] '.$objForms->title;
 				}
 			}
-			else if ($objForms->type == 'instagramUser' || $objForms->type == 'instagramHashtag')
+			else if ($objForms->type == 'instagramUser' || $objForms->type == 'instagramHashtag' || $objForms->type == 'instagramSelfLikes')
 			{
 				if ($objForms->type == 'instagramUser')
 				{
 					$arrForms[$objForms->id] = '[Instagram] '.$objForms->title;
 				}
 				else if ($objForms->type == 'instagramHashtag')
+				{
+					$arrForms[$objForms->id] = '[Instagram] '.$objForms->title;
+				}
+				else if ($objForms->type == 'instagramSelfLikes')
 				{
 					$arrForms[$objForms->id] = '[Instagram] '.$objForms->title;
 				}
@@ -212,32 +216,32 @@ class AggregatorEngine extends \Backend{
 
 		return $arrForms;
 	}
-	
+
 	public function toggleIcon($row, $href, $label, $title, $icon, $attributes)
     {
         $this->import('BackendUser', 'User');
- 
+
         if (strlen($this->Input->get('tid')))
         {
             $this->toggleVisibility($this->Input->get('tid'), ($this->Input->get('state') == 0));
             $this->redirect($this->getReferer());
         }
- 
+
         if (!$this->User->isAdmin && !$this->User->hasAccess('tl_aggregator::published', 'alexf'))
         {
             return '';
         }
- 
+
         $href .= '&amp;id='.$this->Input->get('id').'&amp;tid='.$row['id'].'&amp;state='.$row[''];
- 
+
         if (!$row['published'])
         {
             $icon = 'invisible.gif';
         }
- 
+
         return '<a href="'.$this->addToUrl($href).'" title="'.specialchars($title).'"'.$attributes.'>'.$this->generateImage($icon, $label).'</a> ';
     }
-	
+
 	public function toggleVisibility($intId, $blnPublished)
 	{
 		if (!$this->User->isAdmin && !$this->User->hasAccess('tl_aggregator::published', 'alexf'))
@@ -245,9 +249,9 @@ class AggregatorEngine extends \Backend{
 			$this->log('Not enough permissions to show/hide record ID "'.$intId.'"', 'AggregatorEngine toggleVisibility', TL_ERROR);
 			$this->redirect('contao/main.php?act=error');
 		}
-		
+
 		$this->createInitialVersion('tl_aggregator', $intId);
-		
+
     	if (is_array($GLOBALS['TL_DCA']['tl_aggregator']['fields']['published']['save_callback']))
     	{
         	foreach ($GLOBALS['TL_DCA']['tl_aggregator']['fields']['published']['save_callback'] as $callback)
@@ -256,36 +260,36 @@ class AggregatorEngine extends \Backend{
             	$blnPublished = $this->$callback[0]->$callback[1]($blnPublished, $this);
         	}
     	}
- 
+
     	$this->Database->prepare("UPDATE tl_aggregator SET tstamp=". time() .", published='" . ($blnPublished ? '' : '1') . "' WHERE id=?")->execute($intId);
     	$this->createNewVersion('tl_aggregator', $intId);
 	}
-	
+
 	public function checkForAggregatorUpdates()
 	{
 		global $GLOBALS;
 		$globalBadwordList = explode(',', str_replace(' ', '', $GLOBALS['TL_CONFIG']['aggregator_blacklist']));
 		$allActiveJobs = $this->Database->execute("SELECT * FROM tl_aggregator WHERE published = 1 ORDER BY lastUpdate;");
-		
+
 		$facebookApi = true;
 		$twitterApi = true;
 		$instagramApi = true;
-		
+
 		while ($allActiveJobs->next())
 		{
 			$plattform = str_replace(array('User', 'Hashtag'), '', $allActiveJobs->type);
-			
+
 			if(isset($GLOBALS['TL_CONFIG']['aggregator_'.$plattform.'_cache']))
 			{
 				$duration = $GLOBALS['TL_CONFIG']['aggregator_'.$plattform.'_cache'];
-				
+
 				if($allActiveJobs->cache != 0)
 				{
 					$duration = $allActiveJobs->cache;
 				}
-				
+
 			} else {
-				
+
 				switch ($plattform)
 				{
 					case 'facebook':
@@ -297,9 +301,9 @@ class AggregatorEngine extends \Backend{
 					case 'instagram':
 						$duration = 300;
 				}
-				
+
 			}
-			
+
 			if(time() >= $allActiveJobs->lastUpdate+$duration)
 			{
 				/* Create temporary Badword List */
@@ -310,14 +314,14 @@ class AggregatorEngine extends \Backend{
 				}else{
 					$currentBadwordList = $globalBadwordList;
 				}
-				
+
 				switch($allActiveJobs->type)
 				{
 					case 'facebookUser':
-					
+
 						if($facebookApi)
 						{
-							
+
 							if (isset($GLOBALS['TL_CONFIG']['aggregator_facebook_app_id']) && $GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']) && $GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret'] != '')
 							{
 								$data = $this->fetchUrl('https://graph.facebook.com/v2.5/'.urlencode($allActiveJobs->facebookUser).'/posts/?fields=from,message,full_picture,link,type,created_time&access_token='.$GLOBALS['TL_CONFIG']['aggregator_facebook_app_id'].'|'.$GLOBALS['TL_CONFIG']['aggregator_faceboook_app_secret']);
@@ -331,16 +335,16 @@ class AggregatorEngine extends \Backend{
 										$this->parseDataToCache($data['data'], $allActiveJobs->id, $currentBadwordList, 'facebook');
 									}
 								}
-								
+
 							} else {
 								$facebookApi = false;
 								$this->log($GLOBALS['TL_LANG']['ERR']['noFacebookCredentials'], 'AggregatorEngine checkForUpdates()',TL_ERROR);
 							}
-							
+
 						}
-						
+
 						break;
-						
+
 					case 'twitterUser':
 							if (isset($GLOBALS['TL_CONFIG']['aggregator_twitter_api_key']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_api_key'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_api_secret']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_api_secret'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_access_token'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_access_token_secret']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_access_token_secret'] != '')
 							{
@@ -365,7 +369,7 @@ class AggregatorEngine extends \Backend{
 							$this->log($GLOBALS['TL_LANG']['ERR']['noTwitterCredentials'], 'AggregatorEngine checkForUpdates()',TL_ERROR);
 						}
 						break;
-						
+
 					case 'twitterHashtag':
 						if (isset($GLOBALS['TL_CONFIG']['aggregator_twitter_api_key']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_api_key'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_api_secret']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_api_secret'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_access_token'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_twitter_access_token_secret']) && $GLOBALS['TL_CONFIG']['aggregator_twitter_access_token_secret'] != '')
 							{
@@ -390,7 +394,7 @@ class AggregatorEngine extends \Backend{
 							$this->log($GLOBALS['TL_LANG']['ERR']['noTwitterCredentials'], 'AggregatorEngine checkForUpdates()',TL_ERROR);
 						}
 						break;
-						
+
 					case 'instagramUser':
 					    if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'] != '') {
 					        $data = $this->fetchUrl('https://api.instagram.com/v1/users/self/media/recent?access_token='.$GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'].'&count=50');
@@ -403,7 +407,7 @@ class AggregatorEngine extends \Backend{
 							$this->log($GLOBALS['TL_LANG']['ERR']['noInstagramCredentials'], 'AggregatorEngine checkForUpdates()',TL_ERROR);
 						}
 						break;
-						
+
 					case 'instagramHashtag':
 						if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_id']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'] != '' && isset($GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_client_secret'] != '')
 						{
@@ -413,15 +417,22 @@ class AggregatorEngine extends \Backend{
 							$this->log($GLOBALS['TL_LANG']['ERR']['noInstagramCredentials'], 'tl_aggregator checkForUpdates()',TL_ERROR);
 						}
 						break;
+
+					case 'instagramSelfLikes':
+						if (isset($GLOBALS['TL_CONFIG']['aggregator_instagram_access_token']) && $GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'] != '') {
+							$data = $this->fetchUrl('https://api.instagram.com/v1/users/self/media/liked?client_id='.$GLOBALS['TL_CONFIG']['aggregator_instagram_client_id'].'&access_token='.$GLOBALS['TL_CONFIG']['aggregator_instagram_access_token'].'&count=20');
+							$this->parseDataToCache($data['data'], $allActiveJobs->id, $currentBadwordList, 'instagram');
+						}
+						break;
 				}
 				$this->Database->prepare("UPDATE tl_aggregator SET lastUpdate=". time() ." WHERE id=?")->execute($allActiveJobs->id);
     			$this->createNewVersion('tl_aggregator', $allActiveJobs->id);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private function parseDataToCache($data, $fileId, $badwords, $type)
 	{
 		$cacheLibrary = array();
@@ -461,9 +472,9 @@ class AggregatorEngine extends \Backend{
 				$fp = fopen(TL_ROOT.'/system/modules/aggregator/cache/'.$fileId.'.json.cache', 'w');
 				fwrite($fp, json_encode($cacheLibrary));
 				fclose($fp);
-				
+
 			break;
-			
+
 			case 'twitter':
 			$count = 0;
 				foreach($data as $item)
@@ -484,9 +495,9 @@ class AggregatorEngine extends \Backend{
 				$fp = fopen(TL_ROOT.'/system/modules/aggregator/cache/'.$fileId.'.json.cache', 'w');
 				fwrite($fp, json_encode($cacheLibrary));
 				fclose($fp);
-				
+
 			break;
-			
+
 			case 'instagram':
 				$count = 0;
 				foreach($data as $item)
@@ -518,9 +529,9 @@ class AggregatorEngine extends \Backend{
 				fclose($fp);
 			break;
 		}
-		
+
 	}
-	
+
 	private function checkForBadwords($badwords, $string)
 	{
 			if($bawords[0] != ''){

@@ -2,15 +2,15 @@
 
 /**
  * Contao Open Source CMS
- * 
+ *
  * Copyright (C) 2005-2014 Leo Feyer
- * 
- * @package   aggregator 
+ *
+ * @package   aggregator
  * @author    Johannes Terhürne
  * @license   MIT License
- * @copyright Johannes Terhürne 2014 
+ * @copyright Johannes Terhürne 2014
  */
- 
+
 /**
  * Table tl_aggregator
  */
@@ -24,7 +24,7 @@ $GLOBALS['TL_DCA']['tl_aggregator'] = array(
 			)
 		),
 	),
-	
+
 	'list'     => array(
 		'sorting'           => array(
 			'mode'        => 2,
@@ -32,12 +32,12 @@ $GLOBALS['TL_DCA']['tl_aggregator'] = array(
 			'flag'        => 1,
 			'panelLayout' => 'filter;sort,search,limit'
 		),
-		
+
 		'label'             => array(
 			'fields' => array('type', 'title'),
 			'format' => '[%s] %s',
 		),
-		
+
 		'global_operations' => array(
 			'all' => array(
 				'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
@@ -46,7 +46,7 @@ $GLOBALS['TL_DCA']['tl_aggregator'] = array(
 				'attributes' => 'onclick="Backend.getScrollOffset()" accesskey="e"'
 			)
 		),
-		
+
 		'operations'        => array(
 			'edit'   => array(
 				'label' => &$GLOBALS['TL_LANG']['tl_aggregator']['edit'],
@@ -80,9 +80,10 @@ $GLOBALS['TL_DCA']['tl_aggregator'] = array(
 		'twitterUser'			=> '{title_legend},title,type;{source_legend},twitterUser,cache,badwords,published',
 		'twitterHashtag'		=> '{title_legend},title,type;{source_legend},twitterHashtag,cache,badwords,published',
 		'instagramUser'			=> '{title_legend},title,type;{source_legend},instagramUser,cache,badwords,published',
-		'instagramHashtag'		=> '{title_legend},title,type;{source_legend},instagramHashtag,cache,badwords,published'
+		'instagramHashtag'		=> '{title_legend},title,type;{source_legend},instagramHashtag,cache,badwords,published',
+		'instagramSelfLikes'			=> '{title_legend},title,type;{source_legend},cache,badwords,published'
 	),
-	
+
 	'fields'   => array(
 		'id'     => array(
 			'sql' => "int(10) unsigned NOT NULL auto_increment"
@@ -111,7 +112,7 @@ $GLOBALS['TL_DCA']['tl_aggregator'] = array(
         'type'    => array(
 			'label'         => &$GLOBALS['TL_LANG']['tl_aggregator']['type'],
 			'inputType' => 'select',
-			'options'	=> array('facebookUser', 'twitterUser', 'twitterHashtag', 'instagramUser', 'instagramHashtag'),
+			'options'	=> array('facebookUser', 'twitterUser', 'twitterHashtag', 'instagramUser', 'instagramHashtag', 'instagramSelfLikes'),
 			'reference'	=> &$GLOBALS['TL_LANG']['tl_aggregator']['options'],
 			'exclude'     => true,
 			'eval'      => array(
